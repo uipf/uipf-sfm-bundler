@@ -48,9 +48,14 @@ add_library(BundlerMatcherModule SHARED BundlerMatcherModule.cpp)
 target_link_libraries(BundlerMatcherModule ${ModuleBase})
 add_dependencies(BundlerMatcherModule BUNDLER)
 
+add_library(BundlerSfMModule SHARED BundlerSfMModule.cpp)
+target_link_libraries(BundlerSfMModule ${ModuleBase})
+add_dependencies(BundlerSfMModule BUNDLER)
+
 # installation targets
 install(TARGETS
 	BundlerMatcherModule
+	BundlerSfMModule
 
 	LIBRARY DESTINATION lib/uipf
 	ARCHIVE DESTINATION lib/uipf
@@ -65,5 +70,10 @@ install(FILES ${BUNDLER_BINARY_DIR}/bundler/bin/KeyMatchFull
 	DESTINATION bin/
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 	RENAME uipf-sfm-bundler-keymatchfull
+)
+install(FILES ${BUNDLER_BINARY_DIR}/bundler/bin/bundler
+	DESTINATION bin/
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	RENAME uipf-sfm-bundler
 )
 
