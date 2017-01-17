@@ -25,7 +25,8 @@
 
 // TODO workdir could be just a temporary directory
 #define UIPF_MODULE_PARAMS \
-		{"workdir", uipf::ParamDescription("working directory where key files will be placed.")}
+		{"workdir", uipf::ParamDescription("working directory where key files will be placed.")}, \
+		{"cache", uipf::ParamDescription("whether to cache results, implies createKeyFile. Defaults to false.", true)}
 
 // TODO param $MATCH_WINDOW_RADIUS
 
@@ -47,28 +48,35 @@ void BundlerMatcherModule::run() {
 
 	List::ptr images = getInputData<List>("images");
 
-	UIPF_LOG_INFO("Matching keypoints (this can take a while)")
-
-	string keyListFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("list_keys.txt")).string();
-	ofstream keylistFile(keyListFileName);
-	uipf_foreach(data, images->getContent()) {
-		Image::ptr image = std::dynamic_pointer_cast<Image>(*data);
-		fs::path imageFileName = image->getContent();
-		fs::path keyFileName = imageFileName.parent_path() / fs::path(imageFileName.stem().string() + string(".key"));
-		if (!keyFileName.is_absolute()) {
-			keyFileName = fs::canonical(fs::absolute(keyFileName));
-		}
-		UIPF_LOG_DEBUG("adding file: ", keyFileName.string());
-		keylistFile << keyFileName.string() << "\n";
-		// TODO (later) create key file if it does not exist (non bundler compliant pointmatcher)
-
-	}
-	keylistFile.close();
-
 	string outFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("matches.init.txt")).string();
 
-	// $MATCHKEYS list_keys.txt matches.init.txt $MATCH_WINDOW_RADIUS
-	system((string(MATCHER_BINARY) + string(" ") + keyListFileName + string(" ") + outFileName).c_str());
+	bool cache = getParam<bool>("cache", false);
+	if (cache && fs::exists(fs::path(outFileName))) {
+		UIPF_LOG_INFO("Loading matched keypoints from cache.");
+	} else {
+		UIPF_LOG_INFO("Matching keypoints (this can take a while)");
+
+		string keyListFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("list_keys.txt")).string();
+		ofstream keylistFile(keyListFileName);
+		uipf_foreach(data, images->getContent()) {
+			Image::ptr image = std::dynamic_pointer_cast<Image>(*data);
+			fs::path imageFileName = image->getContent();
+			fs::path keyFileName =
+					imageFileName.parent_path() / fs::path(imageFileName.stem().string() + string(".key"));
+			if (!keyFileName.is_absolute()) {
+				keyFileName = fs::canonical(fs::absolute(keyFileName));
+			}
+			UIPF_LOG_DEBUG("adding file: ", keyFileName.string());
+			keylistFile << keyFileName.string() << "\n";
+			// TODO (later) create key file if it does not exist (non bundler compliant pointmatcher)
+
+		}
+		keylistFile.close();
+
+
+		// $MATCHKEYS list_keys.txt matches.init.txt $MATCH_WINDOW_RADIUS
+		system((string(MATCHER_BINARY) + string(" ") + keyListFileName + string(" ") + outFileName).c_str());
+	}
 
 	// read matches file
 	// format:
