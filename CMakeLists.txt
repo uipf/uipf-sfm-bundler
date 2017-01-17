@@ -24,21 +24,14 @@ include(ExternalProject)
 # build bundler as external project
 ExternalProject_Add(BUNDLER
 	SOURCE_DIR ${uipf-sfm-bundler_SOURCE_DIR}/bundler
-	# make sure compiler settings are same as for our compiler to avoid linking issues
-#	CMAKE_ARGS
-#	-DLTO_ENABLED=OFF
-#	-DOPENMP_ENABLED=OFF
-#	-DCUDA_ENABLED=OFF
-#	-DPROFILING_ENABLED=OFF
-#	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-#	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
-#	-DTESTS_ENABLED=OFF
+	CONFIGURE_COMMAND rsync -r ${uipf-sfm-bundler_SOURCE_DIR}/bundler .
 	# parallelize the build to be faster
-	BUILD_COMMAND make -j 4
+	BUILD_COMMAND cd bundler && make default -j 4
 	TEST_COMMAND ""
 	INSTALL_COMMAND "" # skip install step for COLMAP
 )
-
+ExternalProject_Get_Property(BUNDLER binary_dir)
+set(BUNDLER_BINARY_DIR "${binary_dir}")
 
 
 # find libuipf-module
@@ -51,20 +44,26 @@ message("ModuleBase: ${ModuleBase}")
 include_directories(${ModuleBase_INCLUDE_DIRS})
 
 
-add_library(LoeweSiftModule SHARED LoeweSiftModule.cpp)
-target_link_libraries(LoeweSiftModule ${ModuleBase})
-add_dependencies(LoeweSiftModule BUNDLER)
+add_library(BundlerMatcherModule SHARED BundlerMatcherModule.cpp)
+target_link_libraries(BundlerMatcherModule ${ModuleBase})
+add_dependencies(BundlerMatcherModule BUNDLER)
 
 # installation targets
 install(TARGETS
-	LoeweSiftModule
+	BundlerMatcherModule
 
 	LIBRARY DESTINATION lib/uipf
 	ARCHIVE DESTINATION lib/uipf
 )
 
 # install headers
-install(DIRECTORY ${uipf-sfm-sift_SOURCE_DIR}/include
-	DESTINATION include/uipf-sfm/sift
-	FILES_MATCHING PATTERN "*.hpp"
+#install(DIRECTORY ${uipf-sfm-sift_SOURCE_DIR}/include
+#	DESTINATION include/uipf-sfm/sift
+#	FILES_MATCHING PATTERN "*.hpp"
+#)
+install(FILES ${BUNDLER_BINARY_DIR}/bundler/bin/KeyMatchFull
+	DESTINATION bin/
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	RENAME uipf-sfm-bundler-keymatchfull
 )
+
