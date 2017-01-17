@@ -60,7 +60,7 @@ void BundlerSfMModule::run() {
 	}
 	unique(imageList.begin(), imageList.end());
 
-	string imageListFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("image_list.txt")).string();
+	string imageListFileName = (fs::absolute(fs::path(getParam<string>("workdir", ".")) / fs::path("image_list.txt"))).string();
 	ofstream imageListFile(imageListFileName);
 	uipf_cforeach(i, imageList) {
 		imageListFile << *i << "\n";
@@ -68,7 +68,7 @@ void BundlerSfMModule::run() {
 	imageListFile.close();
 
 	// generate options file
-	string optionsFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("options.txt")).string();
+	string optionsFileName = (fs::absolute(fs::path(getParam<string>("workdir", ".")) / fs::path("options.txt"))).string();
 	ofstream optionsFile(optionsFileName);
 	fs::path bundleDir = fs::path(getParam<string>("workdir", ".")) / fs::path("bundle");
 	if (!fs::exists(bundleDir)) {
@@ -123,7 +123,10 @@ void BundlerSfMModule::run() {
 //		echo "[- Done -]"
 
 	// TODO logfile
+	fs::path oldcwd = fs::absolute(fs::current_path());
+	chdir(getParam<string>("workdir", ".").c_str());
 	system((string(BUNDLER_BINARY) + string(" ") + imageListFileName + string(" --options_file ") + optionsFileName).c_str());
+	chdir(oldcwd.string().c_str());
 
 
 }
