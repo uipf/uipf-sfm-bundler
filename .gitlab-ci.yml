@@ -1,0 +1,61 @@
+before_script:
+  - sudo apt-get -y install gcc g++ gfortran perl jhead imagemagick
+
+stages:
+  - prepare
+  - build
+  - test
+  - deploy
+
+
+# download uipf
+find-uipf-sfm:
+  stage: prepare
+  script:
+#    - 'curl -fsSL -H "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" https://gitlab.cebe.cc/global/gitlab-ci-helpers/raw/master/get-last-successful-build-artifact.sh'
+#    - '. <(curl -fsSL -H "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" https://gitlab.cebe.cc/global/gitlab-ci-helpers/raw/master/get-last-successful-build-artifact.sh)'
+#    - PROJECT=master/uipf PRIVATE_TOKEN=privtoken STAGE=build-uipf-with-cv download_latest
+    - rsync -a /tmp/uipf-sfm-prefix/ prefix/
+    - find prefix/ |sort
+  artifacts:
+    paths:
+    - prefix/
+
+
+build-uipf-sfm-bundler:
+  stage: build
+  script:
+    - if [ -d build/ ]; then rm -rf build/ ; fi
+    - mkdir build/ && cd build/
+    - cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ..
+    - make -j 4
+    - make install
+  dependencies:
+    - find-uipf-sfm
+  artifacts:
+    paths:
+    - prefix/
+
+test:
+  stage: test
+  script:
+    # make sure libs can be found
+    - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`pwd`/prefix/lib"
+    - ./prefix/bin/uipf -l
+    # TODO grep for expected modules
+  dependencies:
+  - build-uipf-sfm-bundler
+
+#deploy:
+#  stage: deploy
+#  script:
+#    # temporary solution for sharing uipf artifacts
+#    - rm -rf /tmp/uipf-sfm-prefix
+#    - rsync -a prefix/ /tmp/uipf-sfm-prefix
+#    - find /tmp/uipf-sfm-prefix |sort
+#  dependencies:
+#    - build-uipf-sfm-bundler
+
+
+variables:
+  GIT_STRATEGY: clone
