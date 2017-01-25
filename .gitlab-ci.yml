@@ -37,6 +37,8 @@ build-uipf-sfm-bundler:
     - prefix/
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
+    # TODO make this global in salt
+    GIT_SSL_CAINFO: /etc/ssl/certs/ca-certificates.crt
 
 test:
   stage: test
