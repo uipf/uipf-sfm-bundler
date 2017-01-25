@@ -1,5 +1,5 @@
 before_script:
-  - sudo apt-get -y install gcc g++ gfortran perl jhead imagemagick liblapacke-dev
+  - sudo apt-get -y install gcc g++ gfortran perl jhead imagemagick liblapacke-dev liblapack-dev libblas-dev
 
 # TODO add ceres solver
 
