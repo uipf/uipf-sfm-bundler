@@ -25,6 +25,7 @@ find-uipf-sfm:
 build-uipf-sfm-bundler:
   stage: build
   script:
+    - GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt git submodule update --init
     - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
     - cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ..
@@ -36,9 +37,10 @@ build-uipf-sfm-bundler:
     paths:
     - prefix/
   variables:
-    GIT_SUBMODULE_STRATEGY: recursive
     # TODO make this global in salt
-    GIT_SSL_CAINFO: /etc/ssl/certs/ca-certificates.crt
+#    GIT_SUBMODULE_STRATEGY: recursive
+#    GIT_SSL_CAINFO: /etc/ssl/certs/ca-certificates.crt
+
 
 test:
   stage: test
