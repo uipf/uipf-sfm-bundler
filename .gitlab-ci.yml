@@ -59,3 +59,4 @@ test:
 
 variables:
   GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
