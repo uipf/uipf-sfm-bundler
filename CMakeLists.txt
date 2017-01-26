@@ -41,7 +41,7 @@ find_library(
 	PATHS ${CMAKE_INSTALL_PREFIX}/lib
 )
 message("ModuleBase: ${ModuleBase}")
-include_directories(${ModuleBase_INCLUDE_DIRS})
+include_directories(${CMAKE_INSTALL_PREFIX}/include)
 
 
 add_library(BundlerMatcherModule SHARED BundlerMatcherModule.cpp)
