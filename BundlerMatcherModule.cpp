@@ -29,7 +29,8 @@
 // TODO workdir could be just a temporary directory
 #define UIPF_MODULE_PARAMS \
 		{"workdir", uipf::ParamDescription("working directory where key files will be placed.")}, \
-		{"cache", uipf::ParamDescription("whether to cache results, implies createKeyFile. Defaults to false.", true)}
+		{"cache", uipf::ParamDescription("whether to cache results, implies createKeyFile. Defaults to false.", true)}, \
+		{"windowRadius", uipf::ParamDescription("MATCH_WINDOW_RADIUS the only match images in a sliding window of size 2rad+1. Defaults to -1, i.e. match all images.", true)}
 
 // TODO param $MATCH_WINDOW_RADIUS
 
@@ -83,9 +84,13 @@ void BundlerMatcherModule::run() {
 		}
 		keylistFile.close();
 
-
+		int windowRadius = getParam("windowRadius", -1);
 		// $MATCHKEYS list_keys.txt matches.init.txt $MATCH_WINDOW_RADIUS
-		system((string(MATCHER_BINARY) + string(" ") + keyListFileName + string(" ") + outFileName).c_str());
+		system((string(MATCHER_BINARY) + string(" ")
+		      + keyListFileName + string(" ")
+		      + outFileName
+		      + (windowRadius > 0 ? string(" ") + to_string(windowRadius) : "")).c_str()
+		);
 	}
 
 	// read matches file
