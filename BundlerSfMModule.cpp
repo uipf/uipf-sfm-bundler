@@ -150,7 +150,7 @@ void BundlerSfMModule::run() {
 				  0.0, c.f, 0.5 * image->height - 0.5,
 				  0.0, 0.0, 1.0 };
 		image->camera.K = K;
-		image->hasCameraParameters;
+		image->hasCameraParameters = true;
 
 //		double Ptmp[12] =
 		cv::Matx34d Ptmp =
@@ -163,7 +163,10 @@ void BundlerSfMModule::run() {
 //		matrix_scale(3, 4, P, -1.0, P);
 
 		image->P = P;
-		image->hasProjectionMatrix;
+		image->hasProjectionMatrix = true;
+
+//		image->data.insert(pair<string, Data::ptr>("bundler_k1", uipf::data::Double::ptr(new Double(c.k[0]))));
+//		image->data.insert(pair<string, Data::ptr>("bundler_k2", uipf::data::Double::ptr(new Double(c.k[1]))));
 
 		cid++;
 	}
