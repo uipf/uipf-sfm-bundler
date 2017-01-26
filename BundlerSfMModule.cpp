@@ -70,7 +70,7 @@ void BundlerSfMModule::run() {
 
 	// TODO create matches.init.txt from imagegraph
 	string matchesFileName = (workdir / fs::path("matches.init.txt")).string();
-	string bundleFileName = (workdir / fs::path("bundle.out")).string();
+	string bundleFileName = (workdir / fs::path("bundle/bundle.out")).string();
 
 	// Generate the options file for running bundler
 	optionsFile << "--match_table " << matchesFileName << "\n"; // TODO configurable
@@ -132,7 +132,9 @@ void BundlerSfMModule::run() {
 	std::vector<camera_params_t> cameras;
 	std::vector<point_t> points;
 	double bundle_version;
-	ReadBundleFile(bundleFileName.c_str(), cameras, points, bundle_version);
+	if (!ReadBundleFile(bundleFileName.c_str(), cameras, points, bundle_version)) {
+		throw ErrorException("error reading bundle file!");
+	}
 	int cid = 0;
 	for(camera_params_t c: cameras) {
 		Image::ptr& image = imageGraph->images.at(cid);
@@ -165,6 +167,8 @@ void BundlerSfMModule::run() {
 
 		cid++;
 	}
+
+	// TODO read 3D points
 
 	setOutputData<ImageGraph>("imageGraph", imageGraph);
 }

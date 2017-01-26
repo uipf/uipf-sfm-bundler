@@ -54,7 +54,7 @@ typedef struct
 
 } point_t;
 
-void ReadBundleFile(const char *bundle_file,
+bool ReadBundleFile(const char *bundle_file,
                     std::vector<camera_params_t> &cameras,
                     std::vector<point_t> &points, double &bundle_version);
 

@@ -23,14 +23,14 @@
  *
  */
 
-void ReadBundleFile(const char *bundle_file,
+bool ReadBundleFile(const char *bundle_file,
                     std::vector<camera_params_t> &cameras,
                     std::vector<point_t> &points, double &bundle_version)
 {
 	FILE *f = fopen(bundle_file, "r");
 	if (f == NULL) {
 		printf("Error opening file %s for reading\n", bundle_file);
-		return;
+		return false;
 	}
 
 	int num_images, num_points;
@@ -121,4 +121,5 @@ void ReadBundleFile(const char *bundle_file,
 	}
 
 	fclose(f);
+	return true;
 }
