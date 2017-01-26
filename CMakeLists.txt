@@ -48,7 +48,7 @@ add_library(BundlerMatcherModule SHARED BundlerMatcherModule.cpp)
 target_link_libraries(BundlerMatcherModule ${ModuleBase})
 add_dependencies(BundlerMatcherModule BUNDLER)
 
-add_library(BundlerSfMModule SHARED BundlerSfMModule.cpp)
+add_library(BundlerSfMModule SHARED BundlerSfMModule.cpp BundlerFunctions.cpp)
 target_link_libraries(BundlerSfMModule ${ModuleBase})
 add_dependencies(BundlerSfMModule BUNDLER)
 

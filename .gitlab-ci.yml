@@ -54,6 +54,8 @@ test:
   dependencies:
   - build-uipf-sfm-bundler
 
+# TODO test a chain
+
 #deploy:
 #  stage: deploy
 #  script:

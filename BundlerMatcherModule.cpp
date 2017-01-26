@@ -1,4 +1,7 @@
 
+#include <map>
+#include <string>
+
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -46,7 +49,15 @@ void BundlerMatcherModule::run() {
 	using namespace std;
 	namespace fs = boost::filesystem;
 
-	List::ptr images = getInputData<List>("images");
+	List::ptr imageList = getInputData<List>("images");
+
+	// create list of images
+	map<int, Image::ptr> images;
+	int iid = 0;
+	for(auto data: imageList->getContent()) {
+		Image::ptr image = std::dynamic_pointer_cast<Image>(data);
+		images.insert(pair<int, Image::ptr>(iid++, image));
+	}
 
 	string outFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("matches.init.txt")).string();
 
@@ -58,9 +69,8 @@ void BundlerMatcherModule::run() {
 
 		string keyListFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("list_keys.txt")).string();
 		ofstream keylistFile(keyListFileName);
-		uipf_foreach(data, images->getContent()) {
-			Image::ptr image = std::dynamic_pointer_cast<Image>(*data);
-			fs::path imageFileName = image->getContent();
+		uipf_foreach(image, images) {
+			fs::path imageFileName = image->second->getContent();
 			fs::path keyFileName =
 					imageFileName.parent_path() / fs::path(imageFileName.stem().string() + string(".key"));
 			if (!keyFileName.is_absolute()) {
@@ -90,9 +100,7 @@ void BundlerMatcherModule::run() {
 		int j;
 		outFile >> i;
 		outFile >> j;
-		Image::ptr imageI = std::dynamic_pointer_cast<Image>(images->getContent()[i]); // TODO replace this cast with a typechecking function that check data::id
-		Image::ptr imageJ = std::dynamic_pointer_cast<Image>(images->getContent()[j]);
-		ImagePair::ptr imagePair(new ImagePair(pair<Image::ptr, Image::ptr>(imageI, imageJ)));
+		ImagePair::ptr imagePair(new ImagePair(pair<Image::ptr, Image::ptr>(images[i], images[j])));
 		// number of matches
 		int d;
 		outFile >> d;
@@ -103,6 +111,7 @@ void BundlerMatcherModule::run() {
 			outFile >> kb;
 			imagePair->keyPointMatches.push_back(pair<int, int>(ka, kb));
 		}
+		imagePair->hasKeyPointMatches = true;
 		imagePairs.push_back(imagePair);
 	}
 
@@ -113,5 +122,7 @@ void BundlerMatcherModule::run() {
 
 	UIPF_LOG_INFO("Created image graph with ", imagePairs.size(), " image pairs.");
 
-	setOutputData<ImageGraph>("imageGraph", new ImageGraph(imagePairs));
+	ImageGraph::ptr imageGraph(new ImageGraph(imagePairs));
+	imageGraph->images = images;
+	setOutputData<ImageGraph>("imageGraph", imageGraph);
 }
