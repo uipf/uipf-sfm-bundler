@@ -52,6 +52,12 @@ void BundlerMatcherModule::run() {
 
 	List::ptr imageList = getInputData<List>("images");
 
+	fs::path workdir = getParam<string>("workdir", ".");
+	if (!fs::exists(workdir)) {
+		UIPF_LOG_INFO("Creating directory ", workdir.string());
+		fs::create_directories(workdir);
+	}
+
 	// create list of images
 	map<int, Image::ptr> images;
 	int iid = 0;
@@ -60,7 +66,7 @@ void BundlerMatcherModule::run() {
 		images.insert(pair<int, Image::ptr>(iid++, image));
 	}
 
-	string outFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("matches.init.txt")).string();
+	string outFileName = (workdir / fs::path("matches.init.txt")).string();
 
 	bool cache = getParam<bool>("cache", false);
 	if (cache && fs::exists(fs::path(outFileName))) {
@@ -68,7 +74,7 @@ void BundlerMatcherModule::run() {
 	} else {
 		UIPF_LOG_INFO("Matching keypoints (this can take a while)");
 
-		string keyListFileName = (fs::path(getParam<string>("workdir", ".")) / fs::path("list_keys.txt")).string();
+		string keyListFileName = (workdir / fs::path("list_keys.txt")).string();
 		ofstream keylistFile(keyListFileName);
 		uipf_foreach(image, images) {
 			fs::path imageFileName = image->second->getContent();

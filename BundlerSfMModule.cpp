@@ -51,6 +51,10 @@ void BundlerSfMModule::run() {
 	ImageGraph::ptr imageGraph = getInputData<ImageGraph>("imageGraph");
 
 	fs::path workdir = fs::absolute(fs::path(getParam<string>("workdir", ".")));
+	if (!fs::exists(workdir)) {
+		UIPF_LOG_INFO("Creating directory ", workdir.string());
+		fs::create_directories(workdir);
+	}
 
 	string imageListFileName = (workdir / fs::path("image_list.txt")).string();
 	ofstream imageListFile(imageListFileName);
@@ -70,6 +74,45 @@ void BundlerSfMModule::run() {
 
 	// TODO create matches.init.txt from imagegraph
 	string matchesFileName = (workdir / fs::path("matches.init.txt")).string();
+
+	// write matches file
+	// format:
+	// image pair: i j \n
+	// # of matches: d \n
+	// indexes of matching points: ka kb
+	ofstream matchesFile(matchesFileName);
+	vector<ImagePair::ptr>& ipairs = imageGraph->getContent();
+	UIPF_LOG_DEBUG("writing ", matchesFileName);
+	for(auto it = ipairs.begin(); it != ipairs.end(); ++it) {
+
+		//assert((*it)->hasKeyPointMatches);
+		Image::ptr imageA = (*it)->getContent().first;
+		Image::ptr imageB = (*it)->getContent().second;
+
+		int iidA = -1;
+		for(auto im: imageGraph->images) {
+			if (im.second == imageA) {
+				iidA = im.first;
+				break;
+			}
+		}
+		int iidB = -1;
+		for(auto im: imageGraph->images) {
+			if (im.second == imageB) {
+				iidB = im.first;
+				break;
+			}
+		}
+//		UIPF_LOG_DEBUG("writing pair ", iidA, " ", iidB);
+		matchesFile << iidA << " " << iidB << "\n";
+		matchesFile << (*it)->keyPointMatches.size() << "\n";
+		for(auto matchIt = (*it)->keyPointMatches.begin(); matchIt != (*it)->keyPointMatches.end(); ++matchIt) {
+			matchesFile << matchIt->first << " " << matchIt->second << "\n";
+		}
+	}
+	matchesFile.close();
+	UIPF_LOG_DEBUG("done writing");
+
 	string bundleFileName = (workdir / fs::path("bundle/bundle.out")).string();
 
 	// Generate the options file for running bundler
