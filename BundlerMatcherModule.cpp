@@ -92,11 +92,14 @@ void BundlerMatcherModule::run() {
 
 		int windowRadius = getParam("windowRadius", -1);
 		// $MATCHKEYS list_keys.txt matches.init.txt $MATCH_WINDOW_RADIUS
-		system((string(MATCHER_BINARY) + string(" ")
+		int ret = system((string(MATCHER_BINARY) + string(" ")
 		      + keyListFileName + string(" ")
 		      + outFileName
 		      + (windowRadius > 0 ? string(" ") + to_string(windowRadius) : "")).c_str()
 		);
+		if (ret != 0) {
+			throw ErrorException("Matcher exited non-zero.");
+		}
 	}
 
 	// read matches file

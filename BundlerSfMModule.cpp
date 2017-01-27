@@ -165,8 +165,11 @@ void BundlerSfMModule::run() {
 	// TODO logfile
 	fs::path oldcwd = fs::absolute(fs::current_path());
 	chdir(workdir.c_str());
-	system((string(BUNDLER_BINARY) + string(" ") + imageListFileName + string(" --options_file ") + optionsFileName).c_str());
+	int ret = system((string(BUNDLER_BINARY) + string(" ") + imageListFileName + string(" --options_file ") + optionsFileName).c_str());
 	chdir(oldcwd.string().c_str());
+	if (ret != 0) {
+		throw ErrorException("Bundler exited non-zero.");
+	}
 
 
 	// read P matrix from images
