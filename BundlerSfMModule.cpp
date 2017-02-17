@@ -59,7 +59,12 @@ void BundlerSfMModule::run() {
 	string imageListFileName = (workdir / fs::path("image_list.txt")).string();
 	ofstream imageListFile(imageListFileName);
 	uipf_cforeach(i, imageGraph->images) {
-		imageListFile << (fs::absolute(fs::path(i->second->getContent()))).string() << "\n";
+		imageListFile << (fs::absolute(fs::path(i->second->getContent()))).string();
+		if (i->second->camera.f > 0) {
+			// TODO $focal_pixels = $res_x * ($focal_mm / $ccd_width_mm);
+			imageListFile << " 0 " << i->second->camera.f;
+		}
+		imageListFile << "\n";
 	}
 	imageListFile.close();
 
@@ -120,21 +125,19 @@ void BundlerSfMModule::run() {
 	optionsFile << "--output bundle.out" << "\n"; // TODO configurable
 	optionsFile << "--output_all bundle_" << "\n"; // TODO configurable
 	optionsFile << "--output_dir " << bundleDir.string() << "\n"; // TODO configurable
-//	optionsFile << "--variable_focal_length" << "\n"; // TODO configurable set to fix for single camera
-//	optionsFile << "--use_focal_estimate" << "\n"; // TODO configurable set to fix for single camera
+
+	optionsFile << "--variable_focal_length" << "\n"; // TODO configurable set to fix for single camera
+	optionsFile << "--use_focal_estimate" << "\n"; // TODO configurable set to fix for single camera
 	optionsFile << "--constrain_focal" << "\n"; // TODO configurable set to fix for single camera
 	optionsFile << "--constrain_focal_weight 0.0001" << "\n"; // TODO configurable set to fix for single camera
 
-	// TODO:
-//if [ "$TRUST_FOCAL" != "" ]
-//then
-//		echo "--trust_focal" >> options.txt
-//		fi
-//
+//	optionsFile << "--trust_focal" << "\n"; // TODO configurable set to fix for single camera
+
+
 //echo "--estimate_distortion" >> options.txt
 //		echo "--ray_angle_threshold $RAY_ANGLE_THRESHOLD" >> options.txt
 
-//	optionsFile << "--estimate_distortion" << "\n";
+	optionsFile << "--estimate_distortion" << "\n";
 	optionsFile << "--ray_angle_threshold 2.0" << "\n";
 
 //
