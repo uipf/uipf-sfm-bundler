@@ -42,7 +42,6 @@
 
 using namespace uipf;
 using namespace uipf::data;
-using namespace uipf::util;
 using namespace uipfsfm::data;
 
 void BundlerMatcherModule::run() {
@@ -80,8 +79,15 @@ void BundlerMatcherModule::run() {
 			fs::path imageFileName = image->second->getContent();
 			fs::path keyFileName =
 					imageFileName.parent_path() / fs::path(imageFileName.stem().string() + string(".key"));
+			if (!fs::exists(keyFileName)) {
+				std::ofstream keyFile(keyFileName.string());
+				image->second->keypoints->serialize(keyFile);
+				keyFile.close();
+
+				// TODO clean up temporary files
+			}
 			if (!keyFileName.is_absolute()) {
-				keyFileName = fs::canonical(fs::absolute(keyFileName));
+				keyFileName = fs::absolute(keyFileName);
 			}
 			UIPF_LOG_DEBUG("adding file: ", keyFileName.string());
 			keylistFile << keyFileName.string() << "\n";

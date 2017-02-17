@@ -40,16 +40,23 @@ find_library(
 	ModuleBase uipf-module
 	PATHS ${CMAKE_INSTALL_PREFIX}/lib
 )
+
+find_library(
+	uipf-sfm uipf-sfm
+	PATHS ${CMAKE_INSTALL_PREFIX}/lib
+)
+message("uipf-sfm: ${uipf-sfm}")
+
 message("ModuleBase: ${ModuleBase}")
 include_directories(${CMAKE_INSTALL_PREFIX}/include)
 
 
 add_library(BundlerMatcherModule SHARED BundlerMatcherModule.cpp)
-target_link_libraries(BundlerMatcherModule ${ModuleBase})
+target_link_libraries(BundlerMatcherModule ${ModuleBase} ${uipf-sfm})
 add_dependencies(BundlerMatcherModule BUNDLER)
 
 add_library(BundlerSfMModule SHARED BundlerSfMModule.cpp BundlerFunctions.cpp)
-target_link_libraries(BundlerSfMModule ${ModuleBase})
+target_link_libraries(BundlerSfMModule ${ModuleBase} ${uipf-sfm})
 add_dependencies(BundlerSfMModule BUNDLER)
 
 # installation targets

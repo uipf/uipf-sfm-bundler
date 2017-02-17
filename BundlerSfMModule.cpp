@@ -24,7 +24,8 @@
 		{"imageGraph", uipf::DataDescription(uipfsfm::data::ImageGraph::id(), "the image graph with matching image pairs.")}
 
 #define UIPF_MODULE_OUTPUTS \
-		{"imageGraph", uipf::DataDescription(uipfsfm::data::ImageGraph::id(), "the image graph with matching image pairs. (now added P matrixes)")}
+		{"imageGraph", uipf::DataDescription(uipfsfm::data::ImageGraph::id(), "the image graph with matching image pairs. (now added P matrixes)")}, \
+		{"images", uipf::DataDescription(uipf::data::List::id(/* TODO typed list */), "all images. (now added P matrixes)")}
 
 // TODO workdir could be just a temporary directory
 #define UIPF_MODULE_PARAMS \
@@ -40,7 +41,6 @@
 
 using namespace uipf;
 using namespace uipf::data;
-using namespace uipf::util;
 using namespace uipfsfm::data;
 
 void BundlerSfMModule::run() {
@@ -219,5 +219,11 @@ void BundlerSfMModule::run() {
 
 	// TODO read 3D points
 
+	List::ptr imageList(new List());
+	for(auto image: imageGraph->images) {
+		imageList->getContent().push_back(image.second);
+	}
+
 	setOutputData<ImageGraph>("imageGraph", imageGraph);
+	setOutputData<List>("images", imageList);
 }
