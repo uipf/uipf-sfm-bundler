@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
+#include <locale.h>
 
 /*
  * These functions are extracted from bundler source code:
  * https://github.com/snavely/bundler_sfm
+ * Adjusted to parse files independently from the current locale (uselocale).
  *
  *  Copyright (c) 2008  Noah Snavely (snavely (at) cs.washington.edu)
  *    and the University of Washington
@@ -34,6 +36,9 @@ bool ReadBundleFile(const char *bundle_file,
 	}
 
 	int num_images, num_points;
+
+	locale_t new_locale = newlocale(LC_ALL, "C", 0);  ;
+	locale_t old_locale = uselocale(new_locale);
 
 	char first_line[256];
 	fgets(first_line, 256, f);
@@ -119,6 +124,8 @@ bool ReadBundleFile(const char *bundle_file,
 			points.push_back(pt);
 		}
 	}
+
+	uselocale(old_locale);
 
 	fclose(f);
 	return true;
