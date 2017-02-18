@@ -12,6 +12,7 @@
 #include <uipf-sfm/data/KeyPointList.hpp>
 #include <uipf-sfm/data/Image.hpp>
 #include <uipf-sfm/data/ImageGraph.hpp>
+#include <uipf-sfm/data/PointCloud.hpp>
 
 #include "BundlerFunctions.hpp"
 
@@ -25,7 +26,8 @@
 
 #define UIPF_MODULE_OUTPUTS \
 		{"imageGraph", uipf::DataDescription(uipfsfm::data::ImageGraph::id(), "the image graph with matching image pairs. (now added P matrixes)")}, \
-		{"images", uipf::DataDescription(uipf::data::List::id(/* TODO typed list */), "all images. (now added P matrixes)")}
+		{"images", uipf::DataDescription(uipf::data::List::id(/* TODO typed list */), "all images. (now added P matrixes)")}, \
+		{"points", uipf::DataDescription(uipfsfm::data::PointCloud::id(), "sparse point cloud resulf of SfM.")}
 
 // TODO workdir could be just a temporary directory
 #define UIPF_MODULE_PARAMS \
@@ -220,13 +222,18 @@ void BundlerSfMModule::run() {
 		cid++;
 	}
 
-	// TODO read 3D points
+	setOutputData<ImageGraph>("imageGraph", imageGraph);
+
+	PointCloud::ptr pointCloud(new PointCloud(std::vector<cv::Point3d>()));
+	for(point_t p: points) {
+		pointCloud->getContent().push_back(cv::Point3d(p.pos[0], p.pos[1], p.pos[2]));
+		pointCloud->colors.push_back(cv::Scalar(p.color[0], p.color[1], p.color[2]));
+	}
+	setOutputData<PointCloud>("points", pointCloud);
 
 	List::ptr imageList(new List());
 	for(auto image: imageGraph->images) {
 		imageList->getContent().push_back(image.second);
 	}
-
-	setOutputData<ImageGraph>("imageGraph", imageGraph);
 	setOutputData<List>("images", imageList);
 }
