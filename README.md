@@ -8,6 +8,7 @@ To compile this you need the following:
 - g++
 - gfortran
 - liblapack-dev
+- libblas-dev
 
 - perl
 - `jhead` for reading image EXIF data.
