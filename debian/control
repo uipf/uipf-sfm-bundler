@@ -2,7 +2,7 @@ Source: uipf-sfm-bundler
 Section: science
 Priority: optional
 Maintainer: Carsten Brandt <mail@cebe.cc>
-Build-Depends: debhelper (>= 9), cmake, libuipf-dev, libuipf-sfm-dev
+Build-Depends: debhelper (>= 9), cmake, libuipf-dev, libuipf-sfm-dev, gfortran, liblapack-dev
 Standards-Version: 3.9.5
 Homepage: https://gitlab.cebe.cc/master/uipf-sfm-bundler
 Vcs-Git: https://gitlab.cebe.cc:master/uipf-sfm-bundler.git
