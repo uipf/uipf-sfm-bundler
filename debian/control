@@ -1,0 +1,16 @@
+Source: uipf-sfm-bundler
+Section: science
+Priority: optional
+Maintainer: Carsten Brandt <mail@cebe.cc>
+Build-Depends: debhelper (>= 9), cmake, libuipf-dev, libuipf-sfm-dev
+Standards-Version: 3.9.5
+Homepage: https://gitlab.cebe.cc/master/uipf-sfm-bundler
+Vcs-Git: https://gitlab.cebe.cc:master/uipf-sfm-bundler.git
+Vcs-Browser: https://gitlab.cebe.cc/master/uipf-sfm-bundler
+
+# main library
+Package: libuipf-sfm-bundler
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Struture from Motion Tools for UIPF (bundler)
+ TBD

@@ -1,0 +1,4 @@
+usr/lib/uipf/libBundlerMatcherModule.so
+usr/lib/uipf/libBundlerSfMModule.so
+usr/bin/uipf-sfm-bundler
+usr/bin/uipf-sfm-bundler-keymatchfull

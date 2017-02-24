@@ -12,6 +12,8 @@ stages:
 
 # download uipf
 find-uipf-sfm:
+  tags:
+    - nodocker
   stage: prepare
   script:
 #    - 'curl -fsSL -H "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" https://gitlab.cebe.cc/global/gitlab-ci-helpers/raw/master/get-last-successful-build-artifact.sh'
@@ -25,6 +27,8 @@ find-uipf-sfm:
 
 
 build-uipf-sfm-bundler:
+  tags:
+    - nodocker
   stage: build
   script:
     - GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt git submodule update --init
@@ -45,6 +49,8 @@ build-uipf-sfm-bundler:
 
 
 test:
+  tags:
+    - nodocker
   stage: test
   script:
     # make sure libs can be found
