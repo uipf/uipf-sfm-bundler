@@ -26,7 +26,7 @@ ExternalProject_Add(BUNDLER
 	SOURCE_DIR ${uipf-sfm-bundler_SOURCE_DIR}/bundler
 	CONFIGURE_COMMAND rsync -r ${uipf-sfm-bundler_SOURCE_DIR}/bundler .
 	# parallelize the build to be faster
-	BUILD_COMMAND cd bundler && make default -j 4
+	BUILD_COMMAND cd bundler && make default -j 4 ANN_TARGET=linux-g++
 	TEST_COMMAND ""
 	INSTALL_COMMAND "" # skip install step for COLMAP
 )
