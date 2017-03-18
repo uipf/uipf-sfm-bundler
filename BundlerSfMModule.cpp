@@ -182,8 +182,9 @@ void BundlerSfMModule::run() {
 
 	std::vector<camera_params_t> cameras;
 	std::vector<point_t> points;
+	std::vector<BundlerPointRef> ptMatch;
 	double bundle_version;
-	if (!ReadBundleFile(bundleFileName.c_str(), cameras, points, bundle_version)) {
+	if (!ReadBundleFile(bundleFileName.c_str(), cameras, points, ptMatch, bundle_version)) {
 		throw ErrorException("error reading bundle file!");
 	}
 	int cid = 0;
@@ -192,6 +193,7 @@ void BundlerSfMModule::run() {
 		image->camera.R = cv::Matx33d(c.R);
 		image->camera.t = cv::Vec3d(c.t);
 		image->camera.f = c.f;
+		image->camera.direction = cv::Vec3d(0, 0, -1);
 
 		assert(image->width > 0 && image->height > 0);
 
@@ -222,14 +224,23 @@ void BundlerSfMModule::run() {
 		cid++;
 	}
 
-	setOutputData<ImageGraph>("imageGraph", imageGraph);
-
 	PointCloud::ptr pointCloud(new PointCloud(std::vector<cv::Point3d>()));
 	for(point_t p: points) {
 		pointCloud->getContent().push_back(cv::Point3d(p.pos[0], p.pos[1], p.pos[2]));
 		pointCloud->colors.push_back(cv::Scalar(p.color[0], p.color[1], p.color[2]));
 	}
 	setOutputData<PointCloud>("points", pointCloud);
+
+	imageGraph->points3D = pointCloud;
+	for(BundlerPointRef ref: ptMatch) {
+		ImageGraph::PointRef pref;
+		pref.imageId = ref.viewId;
+		pref.p3 = ref.pointId;
+		pref.keyPointId = ref.featureId;
+		imageGraph->pointRef.push_back(pref);
+	}
+	setOutputData<ImageGraph>("imageGraph", imageGraph);
+
 
 	List::ptr imageList(new List());
 	for(auto image: imageGraph->images) {

@@ -9,6 +9,7 @@
  * These functions are extracted from bundler source code:
  * https://github.com/snavely/bundler_sfm
  * Adjusted to parse files independently from the current locale (uselocale).
+ * Also adjusted to return information about which point has been seen in which view
  *
  *  Copyright (c) 2008  Noah Snavely (snavely (at) cs.washington.edu)
  *    and the University of Washington
@@ -27,7 +28,9 @@
 
 bool ReadBundleFile(const char *bundle_file,
                     std::vector<camera_params_t> &cameras,
-                    std::vector<point_t> &points, double &bundle_version)
+                    std::vector<point_t> &points,
+                    std::vector<BundlerPointRef> &ptref,
+                    double &bundle_version)
 {
 	FILE *f = fopen(bundle_file, "r");
 	if (f == NULL) {
@@ -114,6 +117,12 @@ bool ReadBundleFile(const char *bundle_file,
 		for (int j = 0; j < num_visible; j++) {
 			int view, key;
 			fscanf(f, "%d %d", &view, &key);
+
+			BundlerPointRef ref;
+			ref.pointId = (unsigned long) i;
+			ref.viewId = (unsigned long) view;
+			ref.featureId = (unsigned long) key;
+			ptref.push_back(ref);
 
 			double x, y;
 			if (bundle_version >= 0.3)

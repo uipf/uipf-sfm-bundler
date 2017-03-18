@@ -26,6 +26,13 @@
 #define NUM_CAMERA_PARAMS 9
 #define POLY_INVERSE_DEGREE 6
 
+
+struct BundlerPointRef {
+	unsigned long pointId;
+	unsigned long viewId;
+	unsigned long featureId;
+};
+
 typedef struct {
 	double R[9];     /* Rotation */
 	double t[3];     /* Translation */
@@ -56,6 +63,8 @@ typedef struct
 
 bool ReadBundleFile(const char *bundle_file,
                     std::vector<camera_params_t> &cameras,
-                    std::vector<point_t> &points, double &bundle_version);
+                    std::vector<point_t> &points,
+                    std::vector<BundlerPointRef> &ptref,
+                    double &bundle_version);
 
 #endif // UIPFSFM_BUNDLER_BUNDLER_FUNCTIONS
