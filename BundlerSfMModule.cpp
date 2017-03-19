@@ -61,7 +61,36 @@ void BundlerSfMModule::run() {
 	string imageListFileName = (workdir / fs::path("image_list.txt")).string();
 	ofstream imageListFile(imageListFileName);
 	uipf_cforeach(i, imageGraph->images) {
-		imageListFile << (fs::absolute(fs::path(i->second->getContent()))).string();
+		string filename = i->second->getContent();
+		// copy image to workdir if the name is upper case, bundler can not handle this...
+		if (uipf_str_ends_with(filename, "JPG") || uipf_str_ends_with(filename, "PGM") || uipf_str_ends_with(uipf_str_to_lower(filename), "png")) {
+			UIPF_LOG_INFO("Converting image ", filename, " to be readable by bundler.");
+			fs::path imagedir = workdir / "images";
+			if (!fs::exists(imagedir)) {
+				fs::create_directories(imagedir);
+			}
+			fs::path imagefile(filename);
+			fs::path newName;
+			string copyKeyfile;
+			if (fs::exists((imagefile.parent_path() / imagefile.stem()).string() + ".key")) {
+				copyKeyfile = (imagefile.parent_path() / imagefile.stem()).string() + ".key";
+			}
+			if (uipf_str_ends_with(uipf_str_to_lower(filename), "png")) {
+				newName = imagedir / (uipf_str_to_lower(imagefile.filename().string()) + ".jpg");
+				cv::Mat m = cv::imread(filename);
+				cv::imwrite(newName.string(), m);
+				filename = newName.string();
+			} else {
+				newName = imagedir / uipf_str_to_lower(imagefile.filename().string());
+				fs::copy(imagefile, newName);
+				filename = newName.string();
+			}
+			if (!copyKeyfile.empty()) {
+				fs::copy(copyKeyfile, (newName.parent_path() / newName.stem()).string() + ".key");
+			}
+		}
+
+		imageListFile << (fs::absolute(fs::path(filename))).string();
 		if (i->second->camera.f > 0) {
 			// TODO $focal_pixels = $res_x * ($focal_mm / $ccd_width_mm);
 			imageListFile << " 0 " << i->second->camera.f;
