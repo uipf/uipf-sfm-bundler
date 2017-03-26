@@ -62,6 +62,7 @@ void BundlerMatcherModule::run() {
 	int iid = 0;
 	for(auto data: imageList->getContent()) {
 		Image::ptr image = std::dynamic_pointer_cast<Image>(data);
+		UIPF_ASSERT(image != NULL);
 		images.insert(pair<int, Image::ptr>(iid++, image));
 	}
 
@@ -98,11 +99,12 @@ void BundlerMatcherModule::run() {
 
 		int windowRadius = getParam("windowRadius", -1);
 		// $MATCHKEYS list_keys.txt matches.init.txt $MATCH_WINDOW_RADIUS
-		int ret = system((string(MATCHER_BINARY) + string(" ")
-		      + keyListFileName + string(" ")
-		      + outFileName
-		      + (windowRadius > 0 ? string(" ") + to_string(windowRadius) : "")).c_str()
-		);
+		std::string command = (string(MATCHER_BINARY) + string(" ")
+			+ keyListFileName + string(" ")
+			+ outFileName
+			+ (windowRadius > 0 ? string(" ") + to_string(windowRadius) : ""));
+		UIPF_LOG_DEBUG("running ", command);
+		int ret = system(command.c_str());
 		if (ret != 0) {
 			throw ErrorException("Matcher exited non-zero.");
 		}
@@ -120,6 +122,7 @@ void BundlerMatcherModule::run() {
 		int j;
 		outFile >> i;
 		outFile >> j;
+		UIPF_ASSERT(images.find(i) != images.end() && images.find(j) != images.end());
 		ImagePair::ptr imagePair(new ImagePair(pair<Image::ptr, Image::ptr>(images[i], images[j])));
 		// number of matches
 		int d;

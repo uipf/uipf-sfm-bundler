@@ -82,14 +82,26 @@ void BundlerSfMModule::run() {
 				filename = newName.string();
 			} else {
 				newName = imagedir / uipf_str_to_lower(imagefile.filename().string());
-				fs::copy(imagefile, newName);
+				fs::copy_file(imagefile, newName, fs::copy_option::overwrite_if_exists);
 				filename = newName.string();
 			}
 			if (!copyKeyfile.empty()) {
-				fs::copy(copyKeyfile, (newName.parent_path() / newName.stem()).string() + ".key");
+				fs::copy_file(copyKeyfile, (newName.parent_path() / newName.stem()).string() + ".key", fs::copy_option::overwrite_if_exists);
 			}
 		}
-
+		// create keypoint file if it does not exist
+		if (!fs::exists((fs::path(filename).parent_path() / fs::path(filename).stem()).string() + ".key")) {
+			std::ofstream keyFile((fs::path(filename).parent_path() / fs::path(filename).stem()).string() + ".key");
+			if (i->second->keypoints->descriptors.size() > 0 && i->second->keypoints->descriptors[0]->type() != CV_8U) {
+				UIPF_LOG_WARNING("Converting key point from float to int! Bundler is incompatible with float points, this could break a lot of things.");
+				// TODO fix this to work properly. currently remove descriptors and set the zero.
+				for(cv::Mat* md: i->second->keypoints->descriptors) {
+					md->convertTo(*md, CV_8U);
+				}
+			}
+			i->second->keypoints->serialize(keyFile);
+			keyFile.close();
+		}
 		imageListFile << (fs::absolute(fs::path(filename))).string();
 		if (i->second->camera.f > 0) {
 			// TODO $focal_pixels = $res_x * ($focal_mm / $ccd_width_mm);
