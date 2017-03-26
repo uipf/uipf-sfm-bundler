@@ -56,7 +56,7 @@ target_link_libraries(BundlerMatcherModule ${ModuleBase} ${uipf-sfm})
 add_dependencies(BundlerMatcherModule BUNDLER)
 
 add_library(BundlerSfMModule SHARED BundlerSfMModule.cpp BundlerFunctions.cpp)
-target_link_libraries(BundlerSfMModule ${ModuleBase} ${uipf-sfm})
+target_link_libraries(BundlerSfMModule ${ModuleBase} ${uipf-sfm} boost_filesystem boost_system)
 add_dependencies(BundlerSfMModule BUNDLER)
 
 # installation targets
